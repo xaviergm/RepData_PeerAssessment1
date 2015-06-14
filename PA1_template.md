@@ -158,6 +158,34 @@ median(daily_means_final$mean_steps)
 ## [1] 37.3826
 ```
 
+As one can notice, the problem about inputting the missing values in the way I decided makes the median equal to the mean, skewing the study in my opinion.
+
 ## Are there differences in activity patterns between weekdays and weekends?
 In order to create the new factor variable, the function weekdays().
+We will do this over the data frame which does not contain the missing values nor the replacement with the mean for the day on the interval. That is, the one created at the beginning consisting only of the complete cases.
 
+
+```r
+days_of_week <- weekdays(activity_complete$date)
+new_factor <- ifelse((days_of_week == "Saturday" | days_of_week == "Sunday"),
+                     "weekend", "weekday")
+activity_wd_we <- activity_complete %>% mutate(weekday_end = new_factor)
+```
+
+Now, means are calculated for weekdays and weekends and plots are generated:
+
+```r
+interval_means_wd <- activity_wd_we %>% filter(weekday_end == "weekday") %>%
+        group_by(interval) %>% summarize(mean(steps))
+names(interval_means_wd)[2] <- "mean_steps"
+interval_means_we <- activity_wd_we %>% filter(weekday_end == "weekend") %>%
+        group_by(interval) %>% summarize(mean(steps))
+names(interval_means_we)[2] <- "mean_steps"
+plot(interval_means_wd$interval, interval_means_wd$mean_steps, type = "l",
+     col='blue')
+lines(interval_means_we$interval, interval_means_we$mean_steps, col='red')
+legend(0, 200, c("Weekdays","Weekends"), lty=c(1,1), lwd=c(2.5,2.5),
+       col=c("blue","red"))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
