@@ -8,6 +8,24 @@ Later in the article we will see how to replace those NA values but not for this
 
 
 ```r
+library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
+library(lubridate)
 unzip("./activity.zip")
 activity <- read.csv("./activity.csv")
 summary(activity)
@@ -25,32 +43,16 @@ summary(activity)
 ```
 
 ```r
+activity <- activity %>% mutate(date = ymd(date))
 activity_complete <- activity[complete.cases(activity),]
 ```
 
-As mentioned before, further processing of the data will happen at a later stage.
+As mentioned before, further processing of the data will happen at a later stage. However, at this point the dates were also converted using lubridate package so they can be used later easily.
 
 ## What is mean total number of steps taken per day?
 In order to calculate the mean steps taken per day, I will make use of the dplyr package. This will allow for grouping in order to do the calculations.
 Firstly, a grouping is made using the dates and then the mean of each date is calculated, generating a new data frame. After that, we can plot the histogram, calculate the mean across all dates and the median.
 
-
-```r
-library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
 
 ```r
 daily_means <- activity_complete %>% group_by(date) %>% summarize(mean(steps))
@@ -122,14 +124,16 @@ activity_final <- activity
 for (i in 1:length(missing_v)) {
         if (missing_v[i]) {
                 activity_final$steps[i] <-
-                        interval_means$mean_steps[interval_means$interval==activity_final$interval[i]]
+                  interval_means$mean_steps[
+                  interval_means$interval==activity_final$interval[i]]
         }
 }
 ```
 Here is the histogram:
 
 ```r
-daily_means_final <- activity_final %>% group_by(date) %>% summarize(mean(steps))
+daily_means_final <- activity_final %>% group_by(date) %>%
+        summarize(mean(steps))
 names(daily_means_final)[2] <- "mean_steps"
 hist(daily_means_final$mean_steps)
 ```
@@ -153,4 +157,7 @@ median(daily_means_final$mean_steps)
 ```
 ## [1] 37.3826
 ```
+
 ## Are there differences in activity patterns between weekdays and weekends?
+In order to create the new factor variable, the function weekdays().
+

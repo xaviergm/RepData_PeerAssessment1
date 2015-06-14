@@ -13,17 +13,15 @@ Later in the article we will see how to replace those NA values but not for this
 
 ```{r}
 library(dplyr)
+library(lubridate)
 unzip("./activity.zip")
 activity <- read.csv("./activity.csv")
 summary(activity)
+activity <- activity %>% mutate(date = ymd(date))
 activity_complete <- activity[complete.cases(activity),]
 ```
 
-As mentioned before, further processing of the data will happen at a later stage. However, at this point the dates will be converted so they can be used later.
-```{r}
-activity <- activity %>% mutate(date = as.Date(date, format = '%Y/%m/%d'))
-
-```
+As mentioned before, further processing of the data will happen at a later stage. However, at this point the dates were also converted using lubridate package so they can be used later easily.
 
 ## What is mean total number of steps taken per day?
 In order to calculate the mean steps taken per day, I will make use of the dplyr package. This will allow for grouping in order to do the calculations.
@@ -73,8 +71,8 @@ for (i in 1:length(missing_v)) {
 ```
 Here is the histogram:
 ```{r}
-daily_means_final <- activity_final %>% group_by(date)
-        %>% summarize(mean(steps))
+daily_means_final <- activity_final %>% group_by(date) %>%
+        summarize(mean(steps))
 names(daily_means_final)[2] <- "mean_steps"
 hist(daily_means_final$mean_steps)
 ```
@@ -84,5 +82,12 @@ And here are mean and median:
 mean(daily_means_final$mean_steps)
 median(daily_means_final$mean_steps)
 ```
+
+As one can notice, the problem about inputting the missing values in the way I decided makes the median equal to the mean, skewing the study in my opinion.
+
 ## Are there differences in activity patterns between weekdays and weekends?
-In order to create the new factor variable, the functions weekdays() and 
+In order to create the new factor variable, the function weekdays().
+We will do this over the data frame which does not contain the missing values nor the replacement with the mean for the day on the interval. That is, the one created at the beginning consisting only of the complete cases.
+
+
+
